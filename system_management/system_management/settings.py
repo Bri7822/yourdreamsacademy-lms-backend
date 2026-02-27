@@ -28,6 +28,8 @@ SECRET_KEY = 'django-insecure-=58_&b#zxkqqwbo1+6lf=&zvl&vbx6jkgfs^2@@dk5qbpp0@p-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
+ENGINE = 'django.db.backends.postgresql'
+
 ALLOWED_HOSTS = ["yourusername.pythonanywhere.com",]
 
 
