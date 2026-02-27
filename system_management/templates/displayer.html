@@ -1,0 +1,545 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Dreams Academy</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Colors */
+            --primary-color: #087990;
+            --secondary-color: #000000;
+            --background-color: #ffffff;
+            --light-accent: rgba(255, 255, 255, 0.2);
+            --gray-bg: #f5f5f5;
+            --border-color: #ddd;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            
+            /* Typography */
+            --font-heading: 'Poppins', sans-serif;
+            --font-body: 'Manrope', sans-serif;
+            --fs-xs: 0.75rem;    /* 12px */
+            --fs-sm: 0.875rem;   /* 14px */
+            --fs-base: 1rem;     /* 16px */
+            --fs-md: 1.125rem;   /* 18px */
+            --fs-lg: 1.25rem;    /* 20px */
+            --fs-xl: 1.5rem;     /* 24px */
+            --fs-2xl: 1.75rem;   /* 28px */
+            --fs-3xl: 2rem;      /* 32px */
+            --fs-4xl: 2.5rem;    /* 40px */
+        }
+        
+        body {
+            background-color: var(--background-color);
+            padding: 0;
+            margin: 0;
+            font-family: var(--font-body);
+            font-size: var(--fs-base);
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+            font-weight: 600;
+        }
+
+        .header-wrapper {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px var(--shadow-color);
+        }
+
+        .navbar-custom {
+            background-color: white;
+            color: black;
+            padding: 0.5rem 0;
+        }
+        
+        .navbar-brand-custom {
+            color: black;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: var(--fs-xl);
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-brand-logo {
+            max-height: 40px;
+            margin-right: 10px;
+        }
+        
+        /* Center the nav items */
+        .navbar-nav-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+        }
+        
+        .nav-item-custom {
+            position: relative;
+        }
+        
+        .nav-link-custom {
+            color: var(--secondary-color);
+            font-family: var(--font-heading);
+            font-size: var(--fs-sm);
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            margin: 0 0.25rem;
+            position: relative;
+        }
+        
+        .nav-link-custom::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: var(--primary-color);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        
+        .nav-link-custom:hover::after,
+        .nav-link-custom.active::after {
+            width: 80%;
+        }
+        
+        .nav-link-custom:hover {
+            color: var(--primary-color);
+        }
+        
+        .nav-link-custom.active {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .course-slider-container {
+            background-color: var(--primary-color);
+            color: var(--background-color);
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            border-bottom: none;
+            padding: 0;
+        }
+        
+        .course-slider-wrapper {
+            display: flex;
+            width: max-content;
+            animation: slideRight 30s linear infinite;
+            height: 100%;
+        }
+        
+        .course-slider-wrapper:hover {
+            animation-play-state: paused;
+        }
+        
+        @keyframes slideRight {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+        
+        .course-item {
+            flex: 0 0 auto;
+            padding: 12px 20px;
+            background-color: var(--light-accent);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-size: var(--fs-sm);
+            font-weight: 500;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+        
+        .course-item:hover {
+            background-color: var(--background-color);
+            color: var(--primary-color);
+        }
+        
+        .hero-section {
+            background-color: var(--secondary-color);
+            color: var(--background-color);
+            padding: 0;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 106px);
+        }
+        
+        .hero-title {
+            font-size: var(--fs-4xl);
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        
+        .hero-subtitle {
+            font-size: var(--fs-md);
+            font-weight: 400;
+            margin-bottom: 2rem;
+        }
+        
+        .search-container {
+            position: relative;
+            max-width: 500px;
+            width: 100%;
+            margin: 2rem auto;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 20px;
+            padding-right: 50px;
+            font-size: var(--fs-base);
+            border: 2px solid var(--primary-color);
+            border-radius: 30px;
+            outline: none;
+            font-family: var(--font-body);
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-color);
+            font-size: var(--fs-lg);
+            cursor: pointer;
+        }
+        
+        .get-started-btn {
+            background-color: var(--primary-color);
+            color: var(--background-color);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-size: var(--fs-sm);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-family: var(--font-heading);
+            letter-spacing: 0.5px;
+        }
+        
+        .get-started-btn:hover {
+            background-color: var(--background-color);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(8, 121, 144, 0.2);
+        }
+        
+        .popular-courses {
+            padding: 3rem 0;
+            background-color: var(--background-color);
+        }
+        
+        .section-title {
+            font-size: var(--fs-2xl);
+            text-align: center;
+            margin-bottom: 2.5rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+        }
+        
+        .course-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            background-color: var(--background-color);
+        }
+        
+        .course-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px var(--shadow-color);
+        }
+        
+        .course-card-title {
+            color: var(--primary-color);
+            font-size: var(--fs-lg);
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .course-card-content {
+            font-size: var(--fs-base);
+            color: #555;
+            margin-bottom: 1.25rem;
+        }
+        
+        .main-footer {
+            background-color: var(--secondary-color);
+            color: var(--background-color);
+            padding: 1.5rem 0;
+            text-align: center;
+            font-size: var(--fs-sm);
+        }
+        
+        .tutorial-section {
+            background-color: var(--background-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .tutorial-title {
+            color: var(--primary-color);
+            font-size: var(--fs-xl);
+            margin-bottom: 1rem;
+        }
+        
+        .example-code {
+            background-color: var(--gray-bg);
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+            font-family: monospace;
+            font-size: var(--fs-sm);
+        }
+        
+        /* For mobile responsiveness */
+        @media (max-width: 992px) {
+            .navbar-nav-center {
+                position: relative;
+                left: 0;
+                transform: none;
+            }
+            
+            .hero-title {
+                font-size: var(--fs-3xl);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header-wrapper">
+        <nav class="navbar navbar-expand-lg navbar-custom">
+            <div class="container">
+                <a class="navbar-brand navbar-brand-custom" href="#">
+                    <img src="{% static 'test1/img/1.png' %}" alt="YDA" class="navbar-brand-logo"></a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main_nav" aria-controls="main_nav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="main_nav">
+                    <ul class="navbar-nav navbar-nav-center">
+                        <li class="nav-item nav-item-custom"><a class="nav-link nav-link-custom active" href="#">Home</a></li>
+                        <li class="nav-item nav-item-custom"><a class="nav-link nav-link-custom" href="#">Tutorials</a></li>
+                        <li class="nav-item nav-item-custom"><a class="nav-link nav-link-custom" href="#">References</a></li>
+                        <li class="nav-item nav-item-custom"><a class="nav-link nav-link-custom" href="#">Exercises</a></li>
+                        <li class="nav-item nav-item-custom"><a class="nav-link nav-link-custom" href="#">About</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="course-slider-container">
+            <div id="course_slider" class="course-slider-wrapper">
+                <!-- Original items -->
+                <div class="course-item">Web Development</div>
+                <div class="course-item">Data Science</div>
+                <div class="course-item">Cyber Security</div>
+                <div class="course-item">Machine Learning</div>
+                <div class="course-item">DevOps</div>
+                <div class="course-item">Mobile Development</div>
+                <div class="course-item">Game Development</div>
+                <div class="course-item">Cloud Computing</div>
+                <!-- Duplicated items for infinite loop effect -->
+                <div class="course-item">Web Development</div>
+                <div class="course-item">Data Science</div>
+                <div class="course-item">Cyber Security</div>
+                <div class="course-item">Machine Learning</div>
+                <div class="course-item">DevOps</div>
+                <div class="course-item">Mobile Development</div>
+                <div class="course-item">Game Development</div>
+                <div class="course-item">Cloud Computing</div>
+            </div>
+        </div>
+    </div>
+    
+    <main>
+        <section class="hero-section">
+            <div class="container">
+                <h2 class="hero-title">Learn Anytime, Anywhere</h2>
+                <p class="hero-subtitle">Join thousands of students in exploring new skills and advancing careers.</p>
+                
+                <div class="search-container">
+                    <input type="text" id="course_search" class="search-input" placeholder="">
+                    <div class="search-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+                
+                <button class="get-started-btn">Get Started</button>
+            </div>
+        </section>
+        
+        <section class="popular-courses">
+            <div class="container">
+                <h2 class="section-title">Popular Courses</h2>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="course-card">
+                            <h3 class="course-card-title">Web Development</h3>
+                            <p class="course-card-content">Learn HTML, CSS, JavaScript and more to build modern websites and applications.</p>
+                            <button class="get-started-btn">Enroll Now</button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="course-card">
+                            <h3 class="course-card-title">Data Science</h3>
+                            <p class="course-card-content">Master data analysis, visualization, and machine learning techniques.</p>
+                            <button class="get-started-btn">Enroll Now</button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="course-card">
+                            <h3 class="course-card-title">Cyber Security</h3>
+                            <p class="course-card-content">Develop skills to protect systems and networks from digital attacks.</p>
+                            <button class="get-started-btn">Enroll Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="tutorial-section">
+            <div class="container">
+                <h3 class="tutorial-title">HTML Tutorial</h3>
+                <p>HTML is the standard markup language for Web pages.</p>
+                <p>With HTML you can create your own Website.</p>
+                <div class="example-code">
+                    &lt;!DOCTYPE html&gt;<br>
+                    &lt;html&gt;<br>
+                    &lt;head&gt;<br>
+                    &nbsp;&nbsp;&lt;title&gt;HTML Tutorial&lt;/title&gt;<br>
+                    &lt;/head&gt;<br>
+                    &lt;body&gt;<br>
+                    &nbsp;&nbsp;&lt;h1&gt;This is a heading&lt;/h1&gt;<br>
+                    &nbsp;&nbsp;&lt;p&gt;This is a paragraph.&lt;/p&gt;<br>
+                    &lt;/body&gt;<br>
+                    &lt;/html&gt;
+                </div>
+                <button class="get-started-btn">Try it Yourself »</button>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="main-footer">
+        <div class="container">
+            <p>&copy; 2024 Your Dreams Academy. All rights reserved.</p>
+        </div>
+    </footer>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            // Enable horizontal scrolling on course slider with mouse wheel
+            $("#course_slider").on('wheel', function(event) {
+                event.preventDefault();
+                
+                // Get the current slider position
+                let currentPosition = parseInt($(this).css('transform').split(',')[4]) || 0;
+                
+                // Adjust position based on scroll direction
+                if(event.originalEvent.deltaY > 0) {
+                    // Scroll right
+                    $(this).css('transform', 'translateX(' + (currentPosition - 50) + 'px)');
+                } else {
+                    // Scroll left
+                    $(this).css('transform', 'translateX(' + (currentPosition + 50) + 'px)');
+                }
+                
+                // Pause the animation during scroll
+                $(this).css('animation-play-state', 'paused');
+                
+                // Resume animation after user stops scrolling
+                clearTimeout($.data(this, 'scrollTimer'));
+                $.data(this, 'scrollTimer', setTimeout(function() {
+                    $("#course_slider").css('animation-play-state', 'running');
+                }, 250));
+            });
+            
+            // Handle course item click
+            $(".course-item").on("click", function(){
+                let course = $(this).text();
+                alert("You selected: " + course);
+            });
+            
+            // Handle Get Started button click
+            $(".get-started-btn").on("click", function(){
+                alert("Thank you for your interest! Registration form will open soon.");
+            });
+            
+            // Handle search icon click
+            $(".search-icon").on("click", function(){
+                let searchValue = $("#course_search").val();
+                if(searchValue) {
+                    alert("Searching for: " + searchValue);
+                } else {
+                    $("#course_search").focus();
+                }
+            });
+            
+            // Enter key for search
+            $("#course_search").on("keypress", function(e) {
+                if(e.which === 13) {
+                    let searchValue = $(this).val();
+                    if(searchValue) {
+                        alert("Searching for: " + searchValue);
+                    }
+                }
+            });
+            
+            // Set active nav link
+            $(".nav-link-custom").on("click", function(e){
+                e.preventDefault();
+                $(".nav-link-custom").removeClass("active");
+                $(this).addClass("active");
+            });
+            
+            // Animated placeholder text
+            const searchPlaceholder = "Search for courses, tutorials, or topics...";
+            let currentIndex = 0;
+            let currentPlaceholder = "";
+            
+            function animatePlaceholder() {
+                if (currentIndex <= searchPlaceholder.length) {
+                    currentPlaceholder = searchPlaceholder.substring(0, currentIndex);
+                    $("#course_search").attr("placeholder", currentPlaceholder);
+                    currentIndex++;
+                    setTimeout(animatePlaceholder, 100);
+                } else {
+                    // Reset for repeating animation
+                    setTimeout(function() {
+                        currentIndex = 0;
+                        currentPlaceholder = "";
+                        animatePlaceholder();
+                    }, 3000);
+                }
+            }
+            
+            // Start placeholder animation
+            animatePlaceholder();
+        });
+    </script>
+</body>
+</html>

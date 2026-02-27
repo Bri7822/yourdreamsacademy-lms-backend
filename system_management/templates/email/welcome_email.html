@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to Your Dreams Academy</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f5f5f5;">
+  <!-- Main Container -->
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+      <td align="center" style="padding: 20px 0;">
+        <!-- Email Content Container -->
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); max-width: 600px; width: 100%;">
+          <!-- Header -->
+          <tr>
+            <td align="center" bgcolor="#087990" style="padding: 30px 20px; color: #ffffff;">
+              <h1 style="margin: 0; font-size: 24px; font-weight: 600;">Welcome to Your Dreams Academy!</h1>
+            </td>
+          </tr>
+          
+          <!-- Content -->
+          <tr>
+            <td style="padding: 30px;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td>
+                    <p style="margin-bottom: 20px;">Hello {{ user.first_name|default:"there" }},</p>
+                    
+                    <p style="margin-bottom: 20px;">Thank you for verifying your email address. Your account is now fully activated and you can access all features of Your Dreams Academy.</p>
+                    
+                    <p style="margin-bottom: 20px;">We're excited to have you as part of our community and look forward to helping you achieve your dreams.</p>
+                    
+                    <!-- Login Button -->
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td align="center" style="padding: 20px 0;">
+                          <table cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                              <td align="center" bgcolor="#087990" style="border-radius: 5px;">
+                                <a href="{{ login_url }}" target="_blank" style="display: inline-block; padding: 12px 25px; font-size: 16px; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: 500;">Log In Now</a>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <p style="margin-top: 30px;">Best regards,<br>Your Dreams Academy Team</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td align="center" bgcolor="#f5f5f5" style="padding: 20px; font-size: 12px; color: #666666;">
+              <p style="margin: 0;">© 2025 Your Dreams Academy. All rights reserved.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
