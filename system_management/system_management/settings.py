@@ -70,7 +70,7 @@ MIDDLEWARE = [
 CORS_ALLOW_ALL_ORIGINS = False  # In production, set to False and use CORS_ALLOWED_ORIGINS
 
 CORS_ALLOWED_ORIGINS = [
-    "https://yourdreamsacademy.vercel.app/"
+    "https://yourdreamsacademy.vercel.app"
 ]
 
 BASE_DIR = Path(__file__).resolve().parent.parent
