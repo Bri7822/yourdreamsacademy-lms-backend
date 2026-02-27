@@ -55,9 +55,9 @@ INSTALLED_APPS = [
 
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -66,12 +66,17 @@ MIDDLEWARE = [
 
 ]
 
-# CORS settings
-CORS_ALLOW_ALL_ORIGINS = False  # In production, set to False and use CORS_ALLOWED_ORIGINS
+CORS_ALLOW_ALL_ORIGINS = False
 
 CORS_ALLOWED_ORIGINS = [
     "https://yourdreamsacademy.vercel.app"
 ]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://yourdreamsacademy.vercel.app",
+]
+
+CORS_ALLOW_CREDENTIALS = True
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -131,8 +136,6 @@ VIDEO_MAX_SIZE = 500 * 1024 * 1024  # 500MB
 # Security settings for file uploads
 SECURE_FILE_UPLOAD_MAX_SIZE = 100 * 1024 * 1024  # 100MB
 
-# For development only - you may want to adjust these for production
-CORS_ALLOW_CREDENTIALS = True
 CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
 SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
 
