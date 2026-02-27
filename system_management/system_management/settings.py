@@ -30,7 +30,7 @@ DEBUG = False
 
 ENGINE = 'django.db.backends.postgresql'
 
-ALLOWED_HOSTS = ["yourusername.pythonanywhere.com",]
+ALLOWED_HOSTS = ['yourdreamsacademy.pythonanywhere.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
