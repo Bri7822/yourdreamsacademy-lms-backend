@@ -23,15 +23,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-=58_&b#zxkqqwbo1+6lf=&zvl&vbx6jkgfs^2@@dk5qbpp0@p-'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# SECRET_KEY = 'django-insecure-=58_&b#zxkqqwbo1+6lf=&zvl&vbx6jkgfs^2@@dk5qbpp0@p-'
 
 ENGINE = 'django.db.backends.postgresql'
 
 ALLOWED_HOSTS = ['yourdreamsacademy.pythonanywhere.com', 'localhost', '127.0.0.1']
 
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = False
 
 # Application definition
 
@@ -330,6 +329,6 @@ LOGGING = {
 }
 
 # PayPal Sandbox Settings
-PAYPAL_BASE_URL = "https://api-m.sandbox.paypal.com"
-PAYPAL_CLIENT_ID = "Adwdb7v2HDbG4nUfTOyRcCUm_V4p59L4_0xXBeM6GuQEeS9Uzbr9-DYGETUM3uLp88rgRV7y9kHHh0yJ"
-PAYPAL_SECRET = "EF18NODaENMQ3DzJ4xoJfCES2x_JdB1teWwGX3HQ64iudXnAM460qnIbpKtTe5ag_HO-G_6m3P_dg2MU"
+# PAYPAL_BASE_URL = "https://api-m.sandbox.paypal.com"
+# PAYPAL_CLIENT_ID = "Adwdb7v2HDbG4nUfTOyRcCUm_V4p59L4_0xXBeM6GuQEeS9Uzbr9-DYGETUM3uLp88rgRV7y9kHHh0yJ"
+# PAYPAL_SECRET = "EF18NODaENMQ3DzJ4xoJfCES2x_JdB1teWwGX3HQ64iudXnAM460qnIbpKtTe5ag_HO-G_6m3P_dg2MU"
