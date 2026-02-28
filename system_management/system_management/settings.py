@@ -78,7 +78,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://yourdreamsacademy.vercel.app",
 ]
 
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_CREDENTIALS = False
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
