@@ -30,7 +30,7 @@ ENGINE = 'django.db.backends.postgresql'
 ALLOWED_HOSTS = ['yourdreamsacademy.pythonanywhere.com', 'localhost', '127.0.0.1']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # Application definition
 
@@ -68,7 +68,7 @@ MIDDLEWARE = [
 
 print("CORS SETTINGS LOADED")
 
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
 
 # CORS_ALLOWED_ORIGINS = [
 #     "https://yourdreamsacademy.vercel.app"
@@ -76,9 +76,10 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 CSRF_TRUSTED_ORIGINS = [
     "https://yourdreamsacademy.vercel.app",
+    "http://localhost:5173",
 ]
 
-CORS_ALLOW_CREDENTIALS = False
+CORS_ALLOW_CREDENTIALS = True
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
