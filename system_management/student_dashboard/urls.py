@@ -24,6 +24,9 @@ urlpatterns = [
     # ✅ DASHBOARD APIs (Enrolled data only)
     path('dashboard/courses/', DashboardCourseListView.as_view(), name='dashboard-courses'),
     path('dashboard/courses/<str:course_code>/lessons/', DashboardCourseLessonsView.as_view(), name='dashboard-course-lessons'),
+      # Public courses (no auth required)
+    path('courses/public/', views.GuestCourseListView.as_view(), name='public-courses'),
+   
     path('courses/', views.StudentCourseListView.as_view(), name='student-courses'),
     path('courses/<str:course_code>/', views.StudentCourseDetailView.as_view(), name='student-course-detail'),
     path('courses/<str:course_code>/enroll/', views.enroll_in_course, name='enroll-in-course'),
@@ -52,9 +55,7 @@ path('lessons/<int:lesson_id>/', views.student_lesson_detail, name='student-less
     path('pending-exercises/', views.student_pending_exercises, name='student-pending-exercises'),
     path('debug/scores/', views.debug_student_scores, name='debug-scores'),
 
-    # Public courses (no auth required)
-    path('courses/public/', views.GuestCourseListView.as_view(), name='public-courses'),
-    # Guest access URLs
+   # Guest access URLs
     path('guest/session/start/', views.start_guest_session, name='start-guest-session'),
     path('guest/session/<uuid:session_id>/validate/', views.validate_guest_session, name='validate-guest-session'),
     path('guest/courses/', views.guest_available_courses, name='guest-available-courses'),

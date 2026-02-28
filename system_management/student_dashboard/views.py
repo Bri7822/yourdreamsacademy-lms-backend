@@ -200,31 +200,111 @@ class StudentCourseDetailView(generics.RetrieveAPIView):
 @permission_classes([permissions.IsAuthenticated])
 def enroll_in_course(request, course_code):
     """
-    API endpoint for students to enroll in a course
+    ✅ ENHANCED: Enrollment with proper status tracking and responses
     """
-    course = get_object_or_404(Course, code=course_code, is_active=True)
-    user = request.user
+    try:
+        course = get_object_or_404(Course, code=course_code, is_active=True)
+        user = request.user
 
-    # Check if already enrolled
-    existing_enrollment = Enrollment.objects.filter(student=user, course=course).first()
-    if existing_enrollment:
-        return Response(
-            {'detail': f'You are already enrolled in this course with status: {existing_enrollment.status}'},
-            status=status.HTTP_400_BAD_REQUEST
+        print(f"\n🎯 ENROLLMENT REQUEST:")
+        print(f"   User: {user.email}")
+
+        # Get user profile and type
+        try:
+            user_profile = user.user_profile
+            user_type = user_profile.user_type
+            print(f"   User Type: {user_type}")
+        except UserProfile.DoesNotExist:
+            # Create profile if it doesn't exist
+            user_profile = UserProfile.objects.create(
+                user=user,
+                user_type='student',  # Default to student
+                terms_agreed=True
+            )
+            user_type = 'student'
+            print(f"   Created missing profile with type: {user_type}")
+
+        # Check user role
+        if user_type in ['admin', 'teacher']:
+            return Response(
+                {
+                    'detail': f'You cannot enroll as a {user_type}. You are the course creator!',
+                    'error_code': 'INVALID_USER_ROLE'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Check if already enrolled
+        existing_enrollment = Enrollment.objects.filter(
+            student=user,
+            course=course
+        ).first()
+
+        if existing_enrollment:
+            status_display = existing_enrollment.status
+            if existing_enrollment.status == 'approved':
+                return Response(
+                    {
+                        'detail': f'You are already enrolled in "{course.title}".',
+                        'enrollment_status': status_display,
+                        'enrolled_at': existing_enrollment.enrolled_at,
+                        'course': {
+                            'id': course.id,
+                            'title': course.title,
+                            'code': course.code
+                        }
+                    },
+                    status=status.HTTP_200_OK
+                )
+            else:
+                return Response(
+                    {
+                        'detail': f'Your enrollment in "{course.title}" is {status_display}.',
+                        'enrollment_status': status_display,
+                        'enrolled_at': existing_enrollment.enrolled_at,
+                        'course': {
+                            'id': course.id,
+                            'title': course.title,
+                            'code': course.code
+                        }
+                    },
+                    status=status.HTTP_200_OK
+                )
+
+        # Create new enrollment - auto-approve for students
+        enrollment = Enrollment.objects.create(
+            student=user,
+            course=course,
+            status='approved'  # Auto-approve enrollment for students
         )
 
-    # Create new enrollment
-    enrollment = Enrollment.objects.create(
-        student=user,
-        course=course,
-        status='pending'  # Default status, can be auto-approved based on settings
-    )
+        print(f"✅ New enrollment created: {enrollment.id}")
+        print(f"   Course: {course.title}")
+        print(f"   Status: {enrollment.status}")
 
-    return Response({
-        'detail': 'Successfully enrolled in the course. Your enrollment is pending approval.',
-        'enrollment_status': enrollment.status,
-        'enrolled_at': enrollment.enrolled_at
-    }, status=status.HTTP_201_CREATED)
+        return Response({
+            'detail': f'Successfully enrolled in "{course.title}"!',
+            'enrollment_status': enrollment.status,
+            'enrolled_at': enrollment.enrolled_at,
+            'course': {
+                'id': course.id,
+                'title': course.title,
+                'code': course.code
+            }
+        }, status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+        print(f"❌ Enrollment error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+
+        return Response(
+            {
+                'detail': f'Error during enrollment: {str(e)}',
+                'error_code': 'ENROLLMENT_ERROR'
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -4434,116 +4514,6 @@ class GuestCourseLessonsView(generics.ListAPIView):
             })
 
         return Response(lesson_data)
-
-@api_view(['POST'])
-@permission_classes([permissions.IsAuthenticated])
-def enroll_in_course(request, course_code):
-    """
-    ✅ ENHANCED: Enrollment with proper status tracking and responses
-    """
-    try:
-        course = get_object_or_404(Course, code=course_code, is_active=True)
-        user = request.user
-
-        print(f"\n🎯 ENROLLMENT REQUEST:")
-        print(f"   User: {user.email}")
-
-        # Get user profile and type
-        try:
-            user_profile = user.user_profile
-            user_type = user_profile.user_type
-            print(f"   User Type: {user_type}")
-        except UserProfile.DoesNotExist:
-            # Create profile if it doesn't exist
-            user_profile = UserProfile.objects.create(
-                user=user,
-                user_type='student',  # Default to student
-                terms_agreed=True
-            )
-            user_type = 'student'
-            print(f"   Created missing profile with type: {user_type}")
-
-        # Check user role
-        if user_type in ['admin', 'teacher']:
-            return Response(
-                {
-                    'detail': f'You cannot enroll as a {user_type}. You are the course creator!',
-                    'error_code': 'INVALID_USER_ROLE'
-                },
-                status=status.HTTP_403_FORBIDDEN
-            )
-
-        # Check if already enrolled
-        existing_enrollment = Enrollment.objects.filter(
-            student=user,
-            course=course
-        ).first()
-
-        if existing_enrollment:
-            status_display = existing_enrollment.status
-            if existing_enrollment.status == 'approved':
-                return Response(
-                    {
-                        'detail': f'You are already enrolled in "{course.title}".',
-                        'enrollment_status': status_display,
-                        'enrolled_at': existing_enrollment.enrolled_at,
-                        'course': {
-                            'id': course.id,
-                            'title': course.title,
-                            'code': course.code
-                        }
-                    },
-                    status=status.HTTP_200_OK
-                )
-            else:
-                return Response(
-                    {
-                        'detail': f'Your enrollment in "{course.title}" is {status_display}.',
-                        'enrollment_status': status_display,
-                        'enrolled_at': existing_enrollment.enrolled_at,
-                        'course': {
-                            'id': course.id,
-                            'title': course.title,
-                            'code': course.code
-                        }
-                    },
-                    status=status.HTTP_200_OK
-                )
-
-        # Create new enrollment - auto-approve for students
-        enrollment = Enrollment.objects.create(
-            student=user,
-            course=course,
-            status='approved'  # Auto-approve enrollment for students
-        )
-
-        print(f"✅ New enrollment created: {enrollment.id}")
-        print(f"   Course: {course.title}")
-        print(f"   Status: {enrollment.status}")
-
-        return Response({
-            'detail': f'Successfully enrolled in "{course.title}"!',
-            'enrollment_status': enrollment.status,
-            'enrolled_at': enrollment.enrolled_at,
-            'course': {
-                'id': course.id,
-                'title': course.title,
-                'code': course.code
-            }
-        }, status=status.HTTP_201_CREATED)
-
-    except Exception as e:
-        print(f"❌ Enrollment error: {str(e)}")
-        import traceback
-        traceback.print_exc()
-
-        return Response(
-            {
-                'detail': f'Error during enrollment: {str(e)}',
-                'error_code': 'ENROLLMENT_ERROR'
-            },
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
