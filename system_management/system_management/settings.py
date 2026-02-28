@@ -143,7 +143,7 @@ SECURE_FILE_UPLOAD_MAX_SIZE = 100 * 1024 * 1024  # 100MB
 CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
 SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
 
-FRONTEND_URL = 'http://localhost:5173/'
+FRONTEND_URL = 'https://yourdreamsacademy.vercel.app/'
 
 # Django REST Framework settings
 REST_FRAMEWORK = {
