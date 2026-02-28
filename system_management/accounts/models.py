@@ -93,10 +93,13 @@ def create_user_profile(sender, instance, created, **kwargs):
         else:
             user_type = 'student'
 
-        UserProfile.objects.create(
+        # get_or_create prevents the UNIQUE constraint crash
+        UserProfile.objects.get_or_create(
             user=instance,
-            user_type=user_type,
-            terms_agreed=True  # Assume admins agree to terms
+            defaults={
+                'user_type': user_type,
+                'terms_agreed': True
+            }
         )
 
 # Dashboard-specific models

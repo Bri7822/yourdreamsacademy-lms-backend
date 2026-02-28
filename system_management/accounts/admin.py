@@ -5,6 +5,9 @@ from .models import CustomUser, UserProfile
 class UserProfileInline(admin.StackedInline):
     model = UserProfile
     can_delete = False
+    extra = 0          # ← No blank extra forms
+    max_num = 1        # ← Only ever ONE profile per user
+    min_num = 0
 
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
