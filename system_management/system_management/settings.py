@@ -226,25 +226,14 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Email configuration
-# settings.py
-
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'yourdreamsacademy@gmail.com'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = '8a0996003@smtp-brevo.com'
-EMAIL_HOST_PASSWORD = 'fJ5g8QYEqtMLGhOz'  # Use app password if using Gmail
+EMAIL_HOST_USER = 'yourdreamsacademy@gmail.com'
+EMAIL_HOST_PASSWORD = 'pscemgpkjvlukeew'  # NOT your Gmail password
 DEFAULT_FROM_EMAIL = 'yourdreamsacademy@gmail.com'
-# Email settings
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'your-smtp-server.com'  # e.g., 'smtp.gmail.com'
-# EMAIL_PORT = 587  # Common port for TLS
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'brightchester5@gmail.com'
-# EMAIL_HOST_PASSWORD = 'Bri9809@'
-# DEFAULT_FROM_EMAIL = 'your-dreams-academy <noreply@yourapp.com>'
 
-# Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
