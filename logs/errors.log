@@ -1,0 +1,8 @@
+[ERROR] 2026-06-01 23:00:03,283 log Internal Server Error: /api/auth/register/
+[ERROR] 2026-06-01 23:00:03,290 log "POST /api/auth/register/ HTTP/1.1" 500 50
+[ERROR] 2026-06-01 23:04:21,589 log Internal Server Error: /api/auth/register/
+[ERROR] 2026-06-01 23:04:21,594 log "POST /api/auth/register/ HTTP/1.1" 500 50
+[ERROR] 2026-06-01 23:07:14,547 log Internal Server Error: /api/auth/register/
+[ERROR] 2026-06-01 23:07:14,559 log "POST /api/auth/register/ HTTP/1.1" 500 50
+[ERROR] 2026-06-01 23:12:21,985 log Internal Server Error: /api/auth/register/
+[ERROR] 2026-06-01 23:12:21,991 log "POST /api/auth/register/ HTTP/1.1" 500 50

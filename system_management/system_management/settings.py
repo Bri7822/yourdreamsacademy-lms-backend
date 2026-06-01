@@ -25,12 +25,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-=58_&b#zxkqqwbo1+6lf=&zvl&vbx6jkgfs^2@@dk5qbpp0@p-'
 
-ENGINE = 'django.db.backends.postgresql'
-
-ALLOWED_HOSTS = ['yourdreamsacademy.pythonanywhere.com', 'localhost', '127.0.0.1']
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
+
+ALLOWED_HOSTS = []
+
 
 # Application definition
 
@@ -55,9 +54,9 @@ INSTALLED_APPS = [
 
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -66,21 +65,19 @@ MIDDLEWARE = [
 
 ]
 
-print("CORS SETTINGS LOADED")
-
-# CORS_ALLOW_ALL_ORIGINS = True
+# CORS settings
+CORS_ALLOW_ALL_ORIGINS = True  # In production, set to False and use CORS_ALLOWED_ORIGINS
 
 CORS_ALLOWED_ORIGINS = [
-    "https://yourdreamsacademy.vercel.app",
-    "http://localhost:5173",
+   "http://localhost:5173",
+   "http://127.0.0.1:5173",
+#    "http://localhost:3000",
+#    "http://127.0.0.1:3000",
+#    "http://localhost:8080",
+#    "http://127.0.0.1:8080",
+       # Vue.js dev server
+#     "https://your-production-domain.com",
 ]
-
-CSRF_TRUSTED_ORIGINS = [
-    "https://yourdreamsacademy.vercel.app",
-    "http://localhost:5173",
-]
-
-CORS_ALLOW_CREDENTIALS = True
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -140,10 +137,12 @@ VIDEO_MAX_SIZE = 500 * 1024 * 1024  # 500MB
 # Security settings for file uploads
 SECURE_FILE_UPLOAD_MAX_SIZE = 100 * 1024 * 1024  # 100MB
 
+# For development only - you may want to adjust these for production
+CORS_ALLOW_CREDENTIALS = True
 CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
 SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
 
-FRONTEND_URL = 'https://yourdreamsacademy.vercel.app/'
+FRONTEND_URL = 'http://localhost:5173/'
 
 # Django REST Framework settings
 REST_FRAMEWORK = {
@@ -201,9 +200,13 @@ WSGI_APPLICATION = 'system_management.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'academy_db',
+        'USER': 'bright_admin',
+        'PASSWORD': 'Jef7801@',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -226,14 +229,25 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Email configuration
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+# settings.py
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'yourdreamsacademy@gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'yourdreamsacademy@gmail.com'
-EMAIL_HOST_PASSWORD = 'pscemgpkjvlukeew'  # NOT your Gmail password
+EMAIL_HOST_USER = '8a0996003@smtp-brevo.com'
+EMAIL_HOST_PASSWORD = 'fJ5g8QYEqtMLGhOz'  # Use app password if using Gmail
 DEFAULT_FROM_EMAIL = 'yourdreamsacademy@gmail.com'
+# Email settings
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'your-smtp-server.com'  # e.g., 'smtp.gmail.com'
+# EMAIL_PORT = 587  # Common port for TLS
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'brightchester5@gmail.com'
+# EMAIL_HOST_PASSWORD = 'Bri9809@'
+# DEFAULT_FROM_EMAIL = 'your-dreams-academy <noreply@yourapp.com>'
 
+# Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
@@ -258,7 +272,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # testing Remove if moving to production by Be right
-# Email settings for development - s emails to console instead of sending
+# Email settings for development - prints emails to console instead of sending
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # DEFAULT_FROM_EMAIL = 'test@example.com'
 
@@ -325,6 +339,6 @@ LOGGING = {
 }
 
 # PayPal Sandbox Settings
-# PAYPAL_BASE_URL = "https://api-m.sandbox.paypal.com"
-# PAYPAL_CLIENT_ID = "Adwdb7v2HDbG4nUfTOyRcCUm_V4p59L4_0xXBeM6GuQEeS9Uzbr9-DYGETUM3uLp88rgRV7y9kHHh0yJ"
-# PAYPAL_SECRET = "EF18NODaENMQ3DzJ4xoJfCES2x_JdB1teWwGX3HQ64iudXnAM460qnIbpKtTe5ag_HO-G_6m3P_dg2MU"
+PAYPAL_BASE_URL = "https://api-m.sandbox.paypal.com"
+PAYPAL_CLIENT_ID = "Adwdb7v2HDbG4nUfTOyRcCUm_V4p59L4_0xXBeM6GuQEeS9Uzbr9-DYGETUM3uLp88rgRV7y9kHHh0yJ"
+PAYPAL_SECRET = "EF18NODaENMQ3DzJ4xoJfCES2x_JdB1teWwGX3HQ64iudXnAM460qnIbpKtTe5ag_HO-G_6m3P_dg2MU"
