@@ -1,4 +1,4 @@
-# system_management/video_views.py
+# system_management/video_middlware.py
 import os
 import mimetypes
 from django.http import FileResponse, HttpResponse, StreamingHttpResponse, Http404

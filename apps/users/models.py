@@ -7,7 +7,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.utils import timezone
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
+from django.core.exceptions import ValidationError
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -125,3 +125,145 @@ def create_user_profile(sender, instance, created, **kwargs):
                 'terms_agreed': False,
             }
         )
+        
+# ---------------------------------------------------------------------------
+# Course
+# ---------------------------------------------------------------------------
+ 
+class Course(models.Model):
+    title = models.CharField(max_length=255)
+    code = models.CharField(max_length=50, unique=True)
+    description = models.TextField(blank=True, null=True)
+    teacher = models.ForeignKey(
+        UserProfile,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='courses_taught',
+    )
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+ 
+    class Meta:
+        app_label = 'users'
+        ordering = ['-created_at']
+ 
+    def __str__(self):
+        return self.title
+ 
+ 
+# ---------------------------------------------------------------------------
+# Enrollment
+# ---------------------------------------------------------------------------
+ 
+class Enrollment(models.Model):
+    PENDING = 'pending'
+    APPROVED = 'approved'
+    COMPLETED = 'completed'
+    DECLINED = 'declined'
+ 
+    STATUS_CHOICES = [
+        (PENDING, 'Pending'),
+        (APPROVED, 'Approved'),
+        (COMPLETED, 'Completed'),
+        (DECLINED, 'Declined'),
+    ]
+ 
+    student = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='enrollments',
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name='enrollments',
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=PENDING)
+    enrolled_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True, null=True)
+ 
+    class Meta:
+        app_label = 'users'
+        unique_together = ('student', 'course')
+        ordering = ['-enrolled_at']
+ 
+    def __str__(self):
+        return f"{self.student.email} → {self.course.title}"
+ 
+    def clean(self):
+        if not hasattr(self.student, 'user_profile'):
+            raise ValidationError("Selected user has no profile")
+        if self.student.user_profile.user_type != 'student':
+            raise ValidationError("Selected user is not a student")
+ 
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        if self.status == self.COMPLETED and not self.completed_at:
+            self.completed_at = timezone.now()
+        super().save(*args, **kwargs)
+ 
+    # ---- computed properties ----
+ 
+    @property
+    def progress(self):
+        from apps.lessons.models import Lesson
+        from apps.quizzes.models import StudentExercise  # adjust if path differs
+        total = Lesson.objects.filter(course=self.course).count()
+        if total == 0:
+            return 0
+        completed = StudentExercise.objects.filter(
+            student=self.student, lesson__course=self.course, completed=True
+        ).count()
+        return round((completed / total) * 100, 1)
+ 
+    @property
+    def exercises_completed(self):
+        from apps.quizzes.models import StudentExercise
+        return StudentExercise.objects.filter(
+            student=self.student, lesson__course=self.course, completed=True
+        ).count()
+ 
+    @property
+    def exercises_total(self):
+        from apps.lessons.models import Lesson
+        return Lesson.objects.filter(course=self.course).count()
+ 
+    @property
+    def student_name(self):
+        return self.student.get_full_name()
+ 
+    @property
+    def student_email(self):
+        return self.student.email
+ 
+    @property
+    def course_title(self):
+        return self.course.title
+ 
+    @property
+    def course_code(self):
+        return self.course.code
+ 
+ 
+# ---------------------------------------------------------------------------
+# AutoApprovalSettings
+# ---------------------------------------------------------------------------
+ 
+class AutoApprovalSettings(models.Model):
+    enabled = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        CustomUser, on_delete=models.SET_NULL, null=True, blank=True
+    )
+ 
+    class Meta:
+        app_label = 'users'
+        verbose_name = "Auto Approval Settings"
+        verbose_name_plural = "Auto Approval Settings"
+ 
+    def __str__(self):
+        return f"Auto-Approval {'Enabled' if self.enabled else 'Disabled'}"        

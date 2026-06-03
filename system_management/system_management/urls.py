@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from .video_views import video_proxy
+from ...core.video_views import video_proxy
 from student_dashboard import views as admin_views
 
 urlpatterns = [

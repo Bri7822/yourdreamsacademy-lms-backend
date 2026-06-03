@@ -36,6 +36,7 @@ LOCAL_APPS = [
     'apps.quizzes',
     'apps.subscriptions',
     'apps.ai',
+    'core'
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
