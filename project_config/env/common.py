@@ -36,6 +36,7 @@ LOCAL_APPS = [
     'apps.quizzes',
     'apps.subscriptions',
     'apps.ai',
+    'apps.students',
     'core'
 ]
 
@@ -53,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'apps.students.middleware.GuestSessionMiddleware',
 ]
 
 # ---------------------------------------------------------------------------
