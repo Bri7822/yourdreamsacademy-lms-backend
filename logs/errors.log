@@ -437,3 +437,21 @@ Traceback (most recent call last):
     )
 django.core.exceptions.ImproperlyConfigured: Field name `is_popular` is not valid for model `Course` in `apps.students.serializers.CourseListSerializer`.
 [ERROR] 2026-06-05 01:09:35,024 log "GET /api/student/home/courses/ HTTP/1.1" 500 25755
+[ERROR] 2026-06-06 12:06:45,515 log Internal Server Error: /api/student/guest/courses/TC001/detail/
+[ERROR] 2026-06-06 12:06:45,517 log "GET /api/student/guest/courses/TC001/detail/?session_id=0435db27-307c-495f-a7a9-5de0b0cf9c69 HTTP/1.1" 500 53
+[ERROR] 2026-06-06 12:07:02,796 log Internal Server Error: /api/student/guest/courses/TC001/detail/
+[ERROR] 2026-06-06 12:07:02,797 log "GET /api/student/guest/courses/TC001/detail/?session_id=0435db27-307c-495f-a7a9-5de0b0cf9c69 HTTP/1.1" 500 53
+[ERROR] 2026-06-06 18:03:48,797 log Internal Server Error: /api/student/guest/courses/TC001/detail/
+[ERROR] 2026-06-06 18:03:48,971 log "GET /api/student/guest/courses/TC001/detail/?session_id=15a514c1-432c-4f36-b943-f1e39c4b6870 HTTP/1.1" 500 53
+[ERROR] 2026-06-06 18:03:55,531 log Internal Server Error: /api/student/guest/courses/TC001/detail/
+[ERROR] 2026-06-06 18:03:55,534 log "GET /api/student/guest/courses/TC001/detail/?session_id=15a514c1-432c-4f36-b943-f1e39c4b6870 HTTP/1.1" 500 53
+[ERROR] 2026-06-06 18:04:01,167 log Internal Server Error: /api/student/guest/courses/TC001/detail/
+[ERROR] 2026-06-06 18:04:01,176 log "GET /api/student/guest/courses/TC001/detail/?session_id=15a514c1-432c-4f36-b943-f1e39c4b6870 HTTP/1.1" 500 53
+[ERROR] 2026-06-06 18:04:16,844 log Internal Server Error: /api/student/guest/courses/TC001/detail/
+[ERROR] 2026-06-06 18:04:16,847 log "GET /api/student/guest/courses/TC001/detail/?session_id=15a514c1-432c-4f36-b943-f1e39c4b6870 HTTP/1.1" 500 53
+[ERROR] 2026-06-08 11:56:34,241 log Internal Server Error: /api/student/search/public/
+[ERROR] 2026-06-08 11:56:34,244 log "GET /api/student/search/public/?q=tes HTTP/1.1" 500 14
+[ERROR] 2026-06-08 11:56:38,255 log Internal Server Error: /api/student/search/public/
+[ERROR] 2026-06-08 11:56:38,257 log "GET /api/student/search/public/?q=tes HTTP/1.1" 500 14
+[ERROR] 2026-06-08 11:56:55,882 log Internal Server Error: /api/student/search/public/
+[ERROR] 2026-06-08 11:56:55,883 log "GET /api/student/search/public/?q=course HTTP/1.1" 500 14

@@ -27,6 +27,7 @@ from .lessons import (
     student_pending_exercises,
     debug_student_scores,
     test_lesson,
+    public_course_lessons_list,
 )
 from .guest import (
     GuestCourseListView,

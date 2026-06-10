@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from apps.students.compat import Lesson, Enrollment, Course, CustomUser, UserProfile
 from apps.students.models import StudentExercise
@@ -123,8 +124,9 @@ class StudentCourseListView(generics.GenericAPIView):
 
 
 class HomeCourseListView(generics.GenericAPIView):
-    """Public: all active courses — no auth required."""
+    """Public: all active courses — no auth required, but JWT token respected if present."""
     permission_classes = []
+    authentication_classes = [JWTAuthentication]  # optional: token → user, no token → anon
     pagination_class = None
 
     def get(self, request, *args, **kwargs):

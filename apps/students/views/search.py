@@ -2,7 +2,7 @@ import logging
 import re
 
 from django.db.models import Q
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
@@ -42,7 +42,7 @@ def search_content(request):
                 'title': course.title,
                 'description': course.description,
                 'code': course.code,
-                'category': getattr(course, 'display_category', course.category),
+                'category': getattr(course, 'display_category', getattr(course, 'category', 'General')),
                 'level': 'beginner',
                 'duration': f"{getattr(course, 'duration', None)} weeks" if getattr(course, 'duration', None) else '',
                 'enrollment_status': enrollment.status if enrollment else 'not_enrolled',
@@ -73,7 +73,7 @@ def search_content(request):
                 'course_title': lesson.course.title,
                 'course_code': lesson.course.code,
                 'code': lesson.course.code,
-                'category': getattr(lesson.course, 'display_category', lesson.course.category),
+                'category': getattr(lesson.course, 'display_category', getattr(lesson.course, 'category', 'General')),
                 'level': 'beginner',
                 'enrollment_status': enrollment.status if enrollment else 'not_enrolled',
                 'requires_auth': True,
@@ -108,7 +108,7 @@ def search_content(request):
                     'course_title': lesson.course.title,
                     'course_code': lesson.course.code,
                     'code': lesson.course.code,
-                    'category': getattr(lesson.course, 'display_category', lesson.course.category),
+                    'category': getattr(lesson.course, 'display_category', getattr(lesson.course, 'category', 'General')),
                     'level': 'beginner',
                     'enrollment_status': enrollment.status if enrollment else 'not_enrolled',
                     'requires_auth': True,
@@ -126,6 +126,7 @@ def search_content(request):
 
 
 @api_view(['GET'])
+@authentication_classes([])
 @permission_classes([AllowAny])
 def search_public_content(request):
     """Search public content for guests."""
@@ -141,7 +142,7 @@ def search_public_content(request):
             results.append({
                 'type': 'course', 'id': course.id, 'title': course.title,
                 'description': course.description, 'code': course.code,
-                'category': getattr(course, 'display_category', course.category),
+                'category': getattr(course, 'display_category', getattr(course, 'category', 'General')),
                 'level': 'beginner',
                 'duration': f"{getattr(course, 'duration', None)} weeks" if getattr(course, 'duration', None) else '',
                 'enrollment_status': 'not_enrolled', 'requires_auth': False, 'allow_preview': True,
@@ -160,7 +161,7 @@ def search_public_content(request):
                 'duration': f"{lesson.duration} min" if lesson.duration else '',
                 'course_id': lesson.course.id, 'course_title': lesson.course.title,
                 'course_code': lesson.course.code, 'code': lesson.course.code,
-                'category': getattr(lesson.course, 'display_category', lesson.course.category),
+                'category': getattr(lesson.course, 'display_category', getattr(lesson.course, 'category', 'General')),
                 'level': 'beginner', 'enrollment_status': 'not_enrolled',
                 'requires_auth': False, 'allow_preview': True, 'order': lesson.order,
             })
@@ -172,6 +173,7 @@ def search_public_content(request):
 
 
 @api_view(['GET'])
+@authentication_classes([])
 @permission_classes([AllowAny])
 def search_suggestions(request):
     query = request.GET.get('q', '').strip().lower()

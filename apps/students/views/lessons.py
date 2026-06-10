@@ -3,10 +3,11 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import generics, permissions, status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from apps.students.compat import Lesson, Enrollment, LessonProgress, Course
 from apps.students.models import StudentExercise
@@ -161,6 +162,7 @@ def _check_lesson_requirements(lesson, user):
 class HomeCourseLessonsView(generics.ListAPIView):
     serializer_class = LessonListSerializer
     permission_classes = []
+    authentication_classes = [JWTAuthentication]  # optional auth: token → user, no token → anon
 
     def get_queryset(self):
         course = get_object_or_404(Course, code=self.kwargs['course_code'], is_active=True)
@@ -170,12 +172,14 @@ class HomeCourseLessonsView(generics.ListAPIView):
 class HomeLessonDetailView(generics.RetrieveAPIView):
     serializer_class = LessonDetailSerializer
     permission_classes = []
+    authentication_classes = [JWTAuthentication]
     queryset = Lesson.objects.filter(is_active=True)
 
 
 class HomeExercisesView(generics.ListAPIView):
     serializer_class = LessonListSerializer
     permission_classes = []
+    authentication_classes = [JWTAuthentication]
 
     def get_queryset(self):
         return Lesson.objects.filter(is_active=True, exercise__isnull=False).order_by('order')
@@ -269,10 +273,12 @@ def course_lessons_list(request, course_code):
 @permission_classes([IsAuthenticated])
 def student_lesson_detail(request, lesson_id):
     lesson = get_object_or_404(Lesson, id=lesson_id, is_active=True)
-    if not _check_enrollment(request.user, lesson):
-        return Response({'detail': 'Not enrolled in this course.'}, status=status.HTTP_403_FORBIDDEN)
     serializer = LessonDetailSerializer(lesson, context={'request': request})
-    return Response(serializer.data)
+    data = serializer.data
+    # Attach enrollment info without blocking
+    enrollment = _check_enrollment(request.user, lesson)
+    data['is_enrolled'] = bool(enrollment)
+    return Response(data)
 
 
 # ---------------------------------------------------------------------------
@@ -795,6 +801,23 @@ def debug_student_scores(request):
 
 
 @api_view(['GET'])
+@authentication_classes([])
 @permission_classes([])
 def test_lesson(request, course_slug, lesson_slug):
     return Response({'course_slug': course_slug, 'lesson_slug': lesson_slug, 'status': 'ok'})
+
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
+def public_course_lessons_list(request, course_code):
+    """Public endpoint — returns lessons without enrollment check.
+    Used by both guests (no token) and the sidebar before enrollment check completes."""
+    course = get_object_or_404(Course, code=course_code, is_active=True)
+    lessons = Lesson.objects.filter(course=course, is_active=True).order_by('order')
+    serializer = LessonListSerializer(lessons, many=True, context={'request': request})
+    return Response({
+        'lessons': serializer.data,
+        'course_code': course_code,
+        'course_title': course.title,
+        'total_lessons': lessons.count(),
+    })

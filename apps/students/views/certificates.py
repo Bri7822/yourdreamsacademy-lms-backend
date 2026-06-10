@@ -3,18 +3,41 @@ import logging
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import permissions, status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response
 
-from apps.students.compat import Lesson, Enrollment
-from apps.students.compat import Course
+from apps.students.compat import Lesson, Enrollment, Course
 from apps.students.models import StudentExercise, Certificate
 from apps.students.serializers import CertificateSerializer
 
 logger = logging.getLogger(__name__)
 
+def _safe_category(course):
+    try:
+        if hasattr(course, 'get_category_display'):
+            return course.get_category_display()
+    except Exception:
+        pass
+    return getattr(course, 'category', 'General') or 'General'
+
+
+def _safe_teacher_name(course):
+    name = getattr(course, 'teacher_name', None)
+    if name:
+        return name
+    try:
+        teacher = getattr(course, 'teacher', None)
+        if teacher:
+            user = getattr(teacher, 'user', None)
+            if user:
+                return f"{user.first_name} {user.last_name}".strip()
+    except Exception:
+        pass
+    return None
+
 
 @api_view(['GET'])
+@authentication_classes([])
 @permission_classes([])
 def student_certificates_list(request):
     """
@@ -32,7 +55,7 @@ def student_certificates_list(request):
                     'id': course.id,
                     'course_title': course.title,
                     'course_code': course.code,
-                    'category': course.category,
+                    'category': _safe_category(course),
                     'teacher_name': getattr(course, 'teacher_name', None),
                     'total_lessons': course.lessons.filter(is_active=True).count(),
                     'description': course.description,
@@ -177,9 +200,19 @@ def generate_certificate(request, course_code):
         ).values_list('score', flat=True))
         avg_grade = (sum(scores) / len(scores) * 100) if scores else 100.0
 
-        certificate, created = Certificate.objects.get_or_create(
-            user=user, course=course, defaults={'grade': avg_grade}
-        )
+        # Get first lesson as default for the required FK
+        first_lesson = Lesson.objects.filter(course=course, is_active=True).first()
+        defaults = {'grade': avg_grade}
+        if first_lesson:
+            defaults['lesson'] = first_lesson
+        try:
+            certificate, created = Certificate.objects.get_or_create(
+                user=user, course=course, defaults=defaults
+            )
+        except Exception:
+            certificate = Certificate.objects.filter(user=user, course=course).first()
+            if not certificate:
+                raise
         if not created:
             certificate.grade = avg_grade
             certificate.save()

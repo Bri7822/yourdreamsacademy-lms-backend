@@ -24,11 +24,17 @@ class CommentListView(generics.ListAPIView):
     """List comments, optionally filtered by course_id."""
     serializer_class = CommentSerializer
     permission_classes = [permissions.AllowAny]
+    pagination_class = None  # frontend expects a plain array
 
     def get_queryset(self):
         qs = Comment.objects.filter(is_active=True).select_related(
             'user', 'course'
-        ).prefetch_related('replies', 'reactions').order_by('-created_at')
+        ).prefetch_related(
+            'replies__user',
+            'replies__reactions',
+            'replies__child_replies__user',
+            'reactions',
+        ).order_by('-created_at')
         course_id = self.request.query_params.get('course_id')
         if course_id:
             qs = qs.filter(course_id=course_id)
@@ -38,6 +44,18 @@ class CommentListView(generics.ListAPIView):
         ctx = super().get_serializer_context()
         ctx['request'] = self.request
         return ctx
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        results = []
+        for comment in queryset:
+            try:
+                serializer = self.get_serializer(comment)
+                results.append(serializer.data)
+            except Exception as e:
+                logger.warning("Error serializing comment %s: %s", comment.id, e)
+                continue
+        return Response(results)
 
 
 class CommentCreateView(generics.CreateAPIView):

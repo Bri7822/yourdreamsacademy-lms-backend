@@ -341,7 +341,10 @@ class LessonDetailSerializer(serializers.ModelSerializer):
         ex_type = ex.get('type', 'multiple-choice')
         if ex_type in ['fill-blank', 'fill_blank']:
             question = ex.get('text', ex.get('question', ''))
-            correct = ex['answers'][0] if ex.get('answers') else ex.get('answer', '')
+            correct = (
+                ex['answers'][0] if ex.get('answers')
+                else ex.get('answer', ex.get('correct_answer', ex.get('correct', '')))
+            )
         elif ex_type == 'paragraph':
             question = ex.get('prompt', ex.get('question', ''))
             correct = None
@@ -373,7 +376,7 @@ class LessonDetailSerializer(serializers.ModelSerializer):
             exercise.update({
                 'question': ex_data.get('text', ex_data.get('question', '')),
                 'options': [],
-                'correct': ex_data['answers'][0] if ex_data.get('answers') else ex_data.get('answer', ''),
+                'correct': ex_data['answers'][0] if ex_data.get('answers') else ex_data.get('answer', ex_data.get('correct_answer', ex_data.get('correct', ''))),
             })
         elif ex_type == 'true_false':
             exercise.update({

@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import generics, status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
@@ -17,6 +17,33 @@ from apps.students.models import GuestSession, GuestAccessSettings
 from apps.students.serializers import GuestCourseSerializer, GuestLessonSerializer
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Helpers (duplicated from courses.py to avoid circular import)
+# ---------------------------------------------------------------------------
+
+def _safe_category(course):
+    try:
+        if hasattr(course, 'get_category_display'):
+            return course.get_category_display()
+    except Exception:
+        pass
+    return getattr(course, 'category', 'General') or 'General'
+
+
+def _safe_teacher_name(course):
+    name = getattr(course, 'teacher_name', None)
+    if name:
+        return name
+    try:
+        teacher = getattr(course, 'teacher', None)
+        if teacher:
+            user = getattr(teacher, 'user', None)
+            if user:
+                return f"{user.first_name} {user.last_name}".strip()
+    except Exception:
+        pass
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -37,6 +64,21 @@ def _parse_exercises_from_lesson(exercise_data):
     if not exercise_data:
         return []
     exercises = []
+
+    def _extract_correct(ex, ex_type=''):
+        """Extract correct answer handling all possible field names."""
+        t = (ex_type or ex.get('type', '')).replace('_', '-')
+        if t == 'fill-blank':
+            # fill-blank stores answer in answers[0], answer, correct_answer, or correct
+            if ex.get('answers'):
+                return ex['answers'][0]
+            return ex.get('answer', ex.get('correct_answer', ex.get('correct', '')))
+        elif t == 'paragraph':
+            return None
+        else:
+            # multiple-choice / true-false: numeric index
+            return ex.get('correct', ex.get('correct_answer', 0))
+
     try:
         if isinstance(exercise_data, list):
             for i, ex in enumerate(exercise_data):
@@ -46,7 +88,7 @@ def _parse_exercises_from_lesson(exercise_data):
                         'type': ex.get('type', 'multiple-choice'),
                         'question': ex.get('question', ex.get('prompt', ex.get('text', ''))),
                         'options': ex.get('options', []),
-                        'correct': ex.get('correct', ex.get('correct_answer', 0)),
+                        'correct': _extract_correct(ex),
                         'explanation': ex.get('explanation', ''),
                     })
         elif isinstance(exercise_data, dict):
@@ -61,7 +103,7 @@ def _parse_exercises_from_lesson(exercise_data):
                         'type': ex_type.replace('_', '-'),
                         'question': ex.get('question', ex.get('text', ex.get('prompt', ''))),
                         'options': ex.get('options', []),
-                        'correct': ex.get('correct_answer', ex.get('correct', 0)),
+                        'correct': _extract_correct(ex, ex_type),
                         'explanation': ex.get('explanation', ''),
                     })
                     idx += 1
@@ -122,6 +164,7 @@ def _build_guest_course_response(courses, settings):
 # ---------------------------------------------------------------------------
 
 @api_view(['POST'])
+@authentication_classes([])
 @permission_classes([AllowAny])
 def start_guest_session(request):
     """Start a new guest session — no auth required."""
@@ -161,6 +204,7 @@ def start_guest_session(request):
 
 
 @api_view(['GET'])
+@authentication_classes([])
 @permission_classes([AllowAny])
 def validate_guest_session(request, session_id):
     if request.user.is_authenticated:
@@ -202,6 +246,7 @@ def validate_guest_session(request, session_id):
 class GuestCourseListView(generics.ListAPIView):
     """All courses available for guest preview with video counts."""
     permission_classes = [AllowAny]
+    authentication_classes = []  # ignore bad tokens on public endpoint
     pagination_class = None
     serializer_class = GuestCourseSerializer
 
@@ -222,6 +267,7 @@ class GuestCourseListView(generics.ListAPIView):
 
 
 @api_view(['GET'])
+@authentication_classes([])
 @permission_classes([AllowAny])
 def guest_available_courses(request):
     """All active courses for guest access."""
@@ -235,6 +281,7 @@ def guest_available_courses(request):
 
 
 @api_view(['GET'])
+@authentication_classes([])
 @permission_classes([AllowAny])
 def guest_course_detail(request, course_code):
     try:
@@ -265,6 +312,7 @@ def guest_course_detail(request, course_code):
 
 
 @api_view(['GET'])
+@authentication_classes([])
 @permission_classes([AllowAny])
 def guest_course_lessons(request, course_code):
     try:
@@ -302,6 +350,7 @@ def guest_course_lessons(request, course_code):
 
 
 @api_view(['GET'])
+@authentication_classes([])
 @permission_classes([AllowAny])
 def get_guest_lesson_by_slug(request, course_slug, lesson_slug):
     try:
@@ -358,6 +407,7 @@ def get_guest_lesson_by_slug(request, course_slug, lesson_slug):
 
 
 @api_view(['POST'])
+@authentication_classes([])
 @permission_classes([AllowAny])
 def guest_submit_exercise(request, lesson_id, exercise_id):
     session_id = request.data.get('session_id')
@@ -384,16 +434,63 @@ def guest_submit_exercise(request, lesson_id, exercise_id):
 # CBV guest views
 # ---------------------------------------------------------------------------
 
-class GuestCourseDetailView(generics.RetrieveAPIView):
+class GuestCourseDetailView(generics.GenericAPIView):
+    """Guest course detail — same as guest_course_detail FBV but as CBV.
+    Returns course data WITH lessons so the template can render them."""
     permission_classes = [AllowAny]
-    serializer_class = GuestCourseSerializer
-    lookup_field = 'code'
-    lookup_url_kwarg = 'course_code'
-    queryset = Course.objects.filter(is_active=True)
+    authentication_classes = []  # ignore bad tokens on public endpoint
+    pagination_class = None
+
+    def get(self, request, course_code):
+        try:
+            course = get_object_or_404(Course, code=course_code, is_active=True)
+            settings = GuestAccessSettings.objects.first()
+            max_lessons = settings.max_lessons_access if settings else 3
+
+            lessons = course.lessons.filter(is_active=True).order_by('order')[:max_lessons]
+            total_lessons = course.lessons.filter(is_active=True).count()
+            video_count = Lesson.objects.filter(course=course, is_active=True).exclude(
+                Q(video_url__isnull=True) | Q(video_url='') | Q(video_url='null')
+            ).count()
+
+            lesson_data = []
+            for lesson in lessons:
+                has_video = bool(
+                    lesson.video_url and str(lesson.video_url).strip() not in ('', 'null')
+                )
+                lesson_data.append({
+                    'id': lesson.id,
+                    'title': lesson.title,
+                    'description': lesson.description or '',
+                    'duration': lesson.duration,
+                    'order': lesson.order,
+                    'has_video': has_video,
+                    'video_url': lesson.video_url if has_video else None,
+                    'exercise_count': 1 if lesson.exercise else 0,
+                })
+
+            return Response({
+                'id': course.id,
+                'title': course.title,
+                'description': course.description,
+                'code': course.code,
+                'duration': getattr(course, 'duration', None),
+                'total_lessons': total_lessons,
+                'preview_lessons': max_lessons,
+                'video_count': video_count,
+                'level': getattr(course, 'level', 'Beginner') or 'Beginner',
+                'teacher_name': _safe_teacher_name(course),
+                'category': _safe_category(course),
+                'lessons': lesson_data,
+            })
+        except Exception as e:
+            logger.exception("GuestCourseDetailView error for %s", course_code)
+            return Response({'detail': str(e)}, status=500)
 
 
 class GuestCourseLessonsView(generics.ListAPIView):
     permission_classes = [AllowAny]
+    authentication_classes = []  # ignore bad tokens on public endpoint
     serializer_class = GuestLessonSerializer
 
     def get_queryset(self):
@@ -408,12 +505,14 @@ class GuestCourseLessonsView(generics.ListAPIView):
 # ---------------------------------------------------------------------------
 
 @api_view(['GET'])
+@authentication_classes([])
 @permission_classes([AllowAny])
 def health_check(request):
     return Response({'status': 'ok', 'timestamp': timezone.now().isoformat()})
 
 
 @api_view(['GET'])
+@authentication_classes([])
 @permission_classes([AllowAny])
 def debug_courses(request):
     courses = Course.objects.filter(is_active=True).values('id', 'title', 'code', 'is_active')
@@ -421,6 +520,7 @@ def debug_courses(request):
 
 
 @api_view(['GET'])
+@authentication_classes([])
 @permission_classes([AllowAny])
 def debug_guest_courses(request):
     settings = GuestAccessSettings.objects.first()

@@ -83,8 +83,10 @@ class Certificate(models.Model):
     )
     lesson = models.ForeignKey(
         'lessons.Lesson',
-        on_delete=models.CASCADE,
-        related_name='certificates'
+        on_delete=models.SET_NULL,
+        related_name='certificates',
+        null=True,
+        blank=True,
     )
     certificate_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     issued_date = models.DateTimeField(auto_now_add=True)
