@@ -1,6 +1,6 @@
 # 🎓 LMS Backend API
 
-A powerful Learning Management System (LMS) backend built with Django REST Framework. This API provides authentication, course management, assessments, student enrollment, progress tracking, and administrative functionality for modern online learning platforms.
+A powerful Learning Management System (LMS) backend built with Django REST Framework. This API provides authentication, course management, exercises, student enrollment, progress tracking, and administrative functionality for modern online learning platforms.
 
 ## 🚀 Features
 
