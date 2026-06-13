@@ -6,10 +6,10 @@
 import jwt
 import logging
 from datetime import datetime, timedelta
-
+from urllib.parse import urlencode, quote
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.html import strip_tags
@@ -55,19 +55,26 @@ class EmailService:
     def send_verification_email(user: CustomUser, request, token: str):
         current_site = get_current_site(request).domain
         relative_url = reverse('verify-email')
-        verification_url = f'http://{current_site}{relative_url}?token={token}'
 
-        html_message = render_to_string('email/verification_email.html', {
-            'user': user,
-            'verification_url': verification_url,
-        })
+        verification_url = (
+            f"http://{current_site}{relative_url}?token={quote(token)}"
+        )
+
+        logger.info(f"Generated verification URL: {verification_url}")
+
+        html_message = render_to_string(
+            'email/verification_email.html',
+            {
+                'user': user,
+                'verification_url': verification_url,
+            }
+        )
 
         EmailService._send(
             subject='Verify Your Email Address',
             html_body=html_message,
             to=user.email,
         )
-        logger.info(f"Verification email sent to {user.email}")
 
     @staticmethod
     def send_welcome_email(user: CustomUser, login_url: str):
@@ -85,7 +92,7 @@ class EmailService:
 
     @staticmethod
     def send_password_reset_email(user: CustomUser, token: str):
-        reset_url = f"{settings.FRONTEND_URL}reset-password?token={token}"
+        reset_url = (f"{settings.FRONTEND_URL}verify-email?token={quote(token)}")
 
         html_message = render_to_string('email/password_reset_email.html', {
             'user': user,
@@ -101,15 +108,15 @@ class EmailService:
 
     @staticmethod
     def _send(subject: str, html_body: str, to: str):
-        """Internal send helper. All emails go through here."""
-        email = EmailMessage(
+        email = EmailMultiAlternatives(
             subject=subject,
-            body=html_body,
+            body="Please open this email in HTML mode.",
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[to],
         )
-        email.content_subtype = 'html'
-        email.send()
+
+        email.attach_alternative(html_body, "text/html")
+        email.send(fail_silently=False)
 
 
 class UserService:
@@ -148,22 +155,34 @@ class UserService:
         """
         Decode verification token and activate the user account.
         Returns the activated user.
-        Raises jwt.ExpiredSignatureError, jwt.DecodeError, or CustomUser.DoesNotExist.
         """
+
+        logger.info(f"Received token: {token}")
+
         payload = TokenService.decode_token(token)
+
+        logger.info(f"Decoded payload: {payload}")
+
         user = CustomUser.objects.get(id=payload['user_id'])
+
+        logger.info(
+            f"Found user: id={user.id}, email={user.email}, is_active={user.is_active}"
+        )
 
         if not user.is_active:
             user.is_active = True
             user.save(update_fields=['is_active'])
+
             logger.info(f"User {user.email} verified and activated")
 
             login_url = settings.FRONTEND_URL + 'login'
+
             try:
                 EmailService.send_welcome_email(user, login_url)
             except Exception as e:
-                # Welcome email failure is non-critical — log and continue
-                logger.error(f"Welcome email failed for {user.email}: {e}")
+                logger.error(
+                    f"Welcome email failed for {user.email}: {e}"
+                )
 
         return user
 

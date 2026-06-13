@@ -124,9 +124,9 @@ class StudentCourseListView(generics.GenericAPIView):
 
 
 class HomeCourseListView(generics.GenericAPIView):
-    """Public: all active courses — no auth required, but JWT token respected if present."""
+    """Public: all active courses — no auth required."""
     permission_classes = []
-    authentication_classes = [JWTAuthentication]  # optional: token → user, no token → anon
+    authentication_classes = [JWTAuthentication]  # optional: token=user, no token=anon
     pagination_class = None
 
     def get(self, request, *args, **kwargs):
@@ -210,6 +210,15 @@ def enroll_in_course(request, course_code):
 
         existing = Enrollment.objects.filter(student=user, course=course).first()
         if existing:
+            if existing.status not in ['approved', 'completed', 'enrolled']:
+                existing.status = 'approved'
+                existing.save(update_fields=['status'])
+                return Response({
+                    'detail': f'Enrolled in "{course.title}"!',
+                    'enrollment_status': existing.status,
+                    'course': {'id': course.id, 'title': course.title, 'code': course.code},
+                }, status=status.HTTP_200_OK)
+
             return Response({
                 'detail': f'Already enrolled — status: {existing.status}.',
                 'enrollment_status': existing.status,

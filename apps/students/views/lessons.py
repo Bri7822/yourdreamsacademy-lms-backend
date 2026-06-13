@@ -24,10 +24,8 @@ logger = logging.getLogger(__name__)
 
 def _check_enrollment(user, lesson):
     return Enrollment.objects.filter(
-        student=user, course=lesson.course, status__in=['approved', 'completed']
+        student=user, course=lesson.course, status__in=['approved', 'completed', 'enrolled']
     ).first()
-
-
 def _calculate_exercise_completion_score(lesson, user):
     """Return float 0.0–1.0 representing exercise completion."""
     try:
@@ -35,30 +33,46 @@ def _calculate_exercise_completion_score(lesson, user):
         if not student_exercise or not student_exercise.submission_data:
             return 0.0
 
-        if isinstance(lesson.exercise, list):
-            total = len(lesson.exercise)
-        elif isinstance(lesson.exercise, dict):
-            if 'questions' in lesson.exercise:
-                total = len(lesson.exercise['questions'])
-            else:
-                types = ['multiple_choice', 'fill_blank', 'paragraph', 'true_false']
-                total = sum(1 for t in types if t in lesson.exercise)
-        else:
-            total = 0
-
+        questions = _get_exercise_questions(lesson)
+        total = len(questions)
         if total == 0:
             return 1.0
 
         completed = sum(
-            1 for i in range(1, total + 1)
-            if student_exercise.submission_data.get(f'question_{i}', {}).get('is_correct')
-            or student_exercise.submission_data.get(f'question_{i}', {}).get('question_type') == 'paragraph'
+            1 for q in questions
+            if student_exercise.submission_data.get(str(q['id']), {}).get('is_correct')
+            or student_exercise.submission_data.get(str(q['id']), {}).get('question_type') == 'paragraph'
         )
         return completed / total
     except Exception as e:
         logger.warning("Error calculating exercise score for lesson %s: %s", lesson.id, e)
         return 0.0
 
+def _get_exercise_questions(lesson):
+    """Normalized question list with the SAME ids used by submit_exercise_answer
+    and the serializers, so submission_data lookups line up."""
+    questions = []
+    ex = lesson.exercise
+    if not ex:
+        return questions
+    if isinstance(ex, list):
+        questions = [q.copy() for q in ex]
+    elif isinstance(ex, dict):
+        if 'questions' in ex:
+            questions = [q.copy() for q in ex['questions']]
+        else:
+            idx = 1
+            for ex_type in ['multiple_choice', 'fill_blank', 'paragraph', 'true_false']:
+                if ex_type in ex:
+                    q = ex[ex_type].copy()
+                    q['type'] = ex_type.replace('_', '-')
+                    q['id'] = q.get('id', f'question_{idx}')
+                    questions.append(q)
+                    idx += 1
+    for i, q in enumerate(questions):
+        if not q.get('id'):
+            q['id'] = f'question_{i + 1}'
+    return questions
 
 def _calculate_lesson_progress(lesson, user):
     """Return detailed progress breakdown for a lesson."""
@@ -67,22 +81,10 @@ def _calculate_lesson_progress(lesson, user):
     try:
         if lesson.video_url:
             vp = LessonProgress.objects.filter(student=user, lesson=lesson).first()
-            video_completed = vp.video_completed if vp else False
+            video_completed = bool(vp and vp.video_completed)
             video_score = 1.0 if video_completed else 0.0
-            if vp and vp.engagement_data:
-                eng = vp.engagement_data.get('engagement_score', 0)
-                watched = vp.engagement_data.get('watched_percentage', 0)
-                if video_completed:
-                    video_score = 0.7 + 0.2 * (eng / 10) + 0.1 * (watched / 100)
-                else:
-                    video_score = min(0.5, watched / 100)
             components.append(video_score)
-            details['video'] = {
-                'completed': video_completed,
-                'score': video_score,
-                'engagement_score': vp.engagement_data.get('engagement_score', 0) if vp and vp.engagement_data else 0,
-                'watched_percentage': vp.engagement_data.get('watched_percentage', 0) if vp and vp.engagement_data else 0,
-            }
+            details['video'] = {'completed': video_completed, 'score': video_score}
 
         if lesson.exercise:
             ex_score = _calculate_exercise_completion_score(lesson, user)
@@ -162,7 +164,8 @@ def _check_lesson_requirements(lesson, user):
 class HomeCourseLessonsView(generics.ListAPIView):
     serializer_class = LessonListSerializer
     permission_classes = []
-    authentication_classes = [JWTAuthentication]  # optional auth: token → user, no token → anon
+    authentication_classes = [JWTAuthentication]
+    pagination_class = None
 
     def get_queryset(self):
         course = get_object_or_404(Course, code=self.kwargs['course_code'], is_active=True)
@@ -258,7 +261,7 @@ def course_lessons_list(request, course_code):
     course = get_object_or_404(Course, code=course_code, is_active=True)
 
     enrollment = Enrollment.objects.filter(
-        student=user, course=course, status__in=['approved', 'completed']
+        student=user, course=course, status__in=['approved', 'completed', 'enrolled']
     ).first()
 
     if not enrollment:
@@ -327,8 +330,6 @@ def mark_lesson_completed(request, lesson_id):
                 'requirements_met': completion_check['requirements_met'],
             })
             student_exercise.save()
-            transaction.commit()
-            student_exercise.refresh_from_db()
 
         all_lessons = Lesson.objects.filter(course=lesson.course, is_active=True).order_by('order')
         completed_ids = set(StudentExercise.objects.filter(

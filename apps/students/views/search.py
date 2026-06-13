@@ -194,7 +194,8 @@ def search_suggestions(request):
                                  'course_title': lesson['course__title'],
                                  'display': f"{lesson['title']} - {lesson['course__title']}"})
 
-        for cat in [c[0] for c in Course.CATEGORY_CHOICES if query in c[0].lower()][:3]:
+        category_choices = getattr(Course, 'CATEGORY_CHOICES', [])
+        for cat in [c[0] for c in category_choices if query in c[0].lower()][:3]:
             suggestions.append({'type': 'category', 'title': cat, 'display': f"Category: {cat}"})
 
         return Response({'suggestions': suggestions})

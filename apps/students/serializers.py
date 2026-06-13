@@ -277,13 +277,26 @@ class LessonListSerializer(serializers.ModelSerializer):
         ]
 
     def get_completed(self, obj):
-        user = self.context['request'].user
+        request = self.context.get('request')
+        if not request:
+            return False
+        user = request.user
         if not user.is_authenticated:
             return False
         return StudentExercise.objects.filter(student=user, lesson=obj, completed=True).exists()
 
     def get_exercise_count(self, obj):
-        return 1 if obj.exercise else 0
+        ex = obj.exercise
+        if ex is None:
+            return 0
+        # Empty dict/list counts as 0; any real content counts as 1
+        if isinstance(ex, dict):
+            return 1 if (ex.get('questions') or any(k in ex for k in ['multiple_choice','fill_blank','paragraph','true_false'])) else 0
+        if isinstance(ex, list):
+            return 1 if len(ex) > 0 else 0
+        if isinstance(ex, str):
+            return 1 if ex.strip() not in ('', '[]', '{}', 'null') else 0
+        return 1 if ex else 0
 
     def get_has_video(self, obj):
         url = getattr(obj, 'video_url', None)
@@ -341,10 +354,8 @@ class LessonDetailSerializer(serializers.ModelSerializer):
         ex_type = ex.get('type', 'multiple-choice')
         if ex_type in ['fill-blank', 'fill_blank']:
             question = ex.get('text', ex.get('question', ''))
-            correct = (
-                ex['answers'][0] if ex.get('answers')
-                else ex.get('answer', ex.get('correct_answer', ex.get('correct', '')))
-            )
+            correct = (ex['answers'][0] if ex.get('answers')
+                       else ex.get('answer', ex.get('correct_answer', ex.get('correct', ''))))
         elif ex_type == 'paragraph':
             question = ex.get('prompt', ex.get('question', ''))
             correct = None
@@ -376,7 +387,8 @@ class LessonDetailSerializer(serializers.ModelSerializer):
             exercise.update({
                 'question': ex_data.get('text', ex_data.get('question', '')),
                 'options': [],
-                'correct': ex_data['answers'][0] if ex_data.get('answers') else ex_data.get('answer', ex_data.get('correct_answer', ex_data.get('correct', ''))),
+                'correct': (ex_data['answers'][0] if ex_data.get('answers')
+                             else ex_data.get('answer', ex_data.get('correct_answer', ex_data.get('correct', '')))),
             })
         elif ex_type == 'true_false':
             exercise.update({
