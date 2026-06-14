@@ -211,7 +211,7 @@ class Enrollment(models.Model):
     @property
     def progress(self):
         from apps.lessons.models import Lesson
-        from apps.quizzes.models import StudentExercise  # adjust if path differs
+        from apps.students.models import StudentExercise
         total = Lesson.objects.filter(course=self.course).count()
         if total == 0:
             return 0
@@ -219,10 +219,10 @@ class Enrollment(models.Model):
             student=self.student, lesson__course=self.course, completed=True
         ).count()
         return round((completed / total) * 100, 1)
- 
+
     @property
     def exercises_completed(self):
-        from apps.quizzes.models import StudentExercise
+        from apps.students.models import StudentExercise
         return StudentExercise.objects.filter(
             student=self.student, lesson__course=self.course, completed=True
         ).count()

@@ -496,3 +496,9 @@ AttributeError: type object 'UserService' has no attribute 'ensure_profile_user_
 [ERROR] 2026-06-13 16:34:10,100 log "GET /api/admin/enrollment-management/enrollments/ HTTP/1.1" 500 39
 [ERROR] 2026-06-13 16:34:48,681 log Internal Server Error: /api/admin/enrollment-management/enrollments/
 [ERROR] 2026-06-13 16:34:48,706 log "GET /api/admin/enrollment-management/enrollments/ HTTP/1.1" 500 39
+[ERROR] 2026-06-14 00:21:35,961 log Internal Server Error: /api/admin/enrollment-management/enrollments/
+[ERROR] 2026-06-14 00:21:36,211 log "GET /api/admin/enrollment-management/enrollments/ HTTP/1.1" 500 39
+[ERROR] 2026-06-14 03:11:54,029 log Internal Server Error: /api/admin/enrollment-management/enrollments/
+[ERROR] 2026-06-14 03:11:54,227 log "GET /api/admin/enrollment-management/enrollments/ HTTP/1.1" 500 39
+[ERROR] 2026-06-14 03:16:29,177 log Internal Server Error: /api/admin/enrollment-management/enrollments/
+[ERROR] 2026-06-14 03:16:29,188 log "GET /api/admin/enrollment-management/enrollments/ HTTP/1.1" 500 39

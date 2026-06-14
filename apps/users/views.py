@@ -524,7 +524,7 @@ class EnrollmentActionView(APIView):
                 enrollment.save()
                 message = 'Enrollment marked as complete'
             elif action == 'reset':
-                from apps.quizzes.models import StudentExercise
+                from apps.students.models import StudentExercise
                 StudentExercise.objects.filter(
                     student=enrollment.student, lesson__course=enrollment.course
                 ).update(completed=False, completed_at=None, score=0.0)

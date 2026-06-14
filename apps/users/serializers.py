@@ -145,7 +145,7 @@ class EnrollmentSerializer(serializers.ModelSerializer):
         return obj.student.email
  
     def get_exercises_completed(self, obj):
-        from apps.quizzes.models import StudentExercise
+        from apps.students.models import StudentExercise
         return StudentExercise.objects.filter(
             student=obj.student, lesson__course=obj.course, completed=True
         ).count()
