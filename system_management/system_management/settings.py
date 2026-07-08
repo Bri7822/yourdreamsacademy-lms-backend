@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-=58_&b#zxkqqwbo1+6lf=&zvl&vbx6jkgfs^2@@dk5qbpp0@p-'
+SECRET_KEY = ''
 
 ENGINE = 'django.db.backends.postgresql'
 
@@ -140,8 +140,8 @@ VIDEO_MAX_SIZE = 500 * 1024 * 1024  # 500MB
 # Security settings for file uploads
 SECURE_FILE_UPLOAD_MAX_SIZE = 100 * 1024 * 1024  # 100MB
 
-CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
-SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 FRONTEND_URL = 'https://yourdreamsacademy.vercel.app/'
 
@@ -230,8 +230,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'yourdreamsacademy@gmail.com'
-EMAIL_HOST_PASSWORD = 'pscemgpkjvlukeew'  # NOT your Gmail password
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''  
 DEFAULT_FROM_EMAIL = 'yourdreamsacademy@gmail.com'
 
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -256,75 +256,5 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-# testing Remove if moving to production by Be right
-# Email settings for development - s emails to console instead of sending
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-# DEFAULT_FROM_EMAIL = 'test@example.com'
-
-
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'handlers': {
-#         'file': {
-#             'level': 'ERROR',
-#             'class': 'logging.FileHandler',
-#             'filename': 'django_errors.log',
-#         },
-#     },
-#     'loggers': {
-#         'django': {
-#             'handlers': ['file'],
-#             'level': 'ERROR',
-#             'propagate': True,
-#         },
-#     },
-# }
-
-# settings.py - Add this logging configuration
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '[{levelname}] {asctime} {module} {message}',
-            'style': '{',
-        },
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose'
-        },
-        'file': {
-            'level': 'ERROR',
-            'class': 'logging.FileHandler',
-            'filename': 'django_errors.log',
-            'formatter': 'verbose'
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'student_dashboard': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-    },
-}
-
-# PayPal Sandbox Settings
-# PAYPAL_BASE_URL = "https://api-m.sandbox.paypal.com"
-# PAYPAL_CLIENT_ID = "Adwdb7v2HDbG4nUfTOyRcCUm_V4p59L4_0xXBeM6GuQEeS9Uzbr9-DYGETUM3uLp88rgRV7y9kHHh0yJ"
+_ID = "Adwdb7v2HDbG4nUfTOyRcCUm_V4p59L4_0xXBeM6GuQEeS9Uzbr9-DYGETUM3uLp88rgRV7y9kHHh0yJ"
 # PAYPAL_SECRET = "EF18NODaENMQ3DzJ4xoJfCES2x_JdB1teWwGX3HQ64iudXnAM460qnIbpKtTe5ag_HO-G_6m3P_dg2MU"
