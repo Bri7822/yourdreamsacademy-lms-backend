@@ -29,7 +29,6 @@ ENGINE = 'django.db.backends.postgresql'
 
 ALLOWED_HOSTS = ['yourdreamsacademy.pythonanywhere.com', 'localhost', '127.0.0.1']
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
 # Application definition
